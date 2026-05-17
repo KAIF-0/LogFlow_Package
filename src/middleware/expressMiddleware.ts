@@ -28,9 +28,13 @@ export class ExpressMiddleware {
     const locals = res.locals as LogFlowLocals;
     locals.__logflowContext = context;
 
+    if ((this.logFlow as any).isConsoleEnabled && (this.logFlow as any).isConsoleEnabled()) {
+      console.log(`[LogFlow][Request] ${req.method} ${context.baseLog.path}`);
+    }
+
     this.responseInterceptor.attach(req, res, context, (log: LifecycleLog) => {
       this.logFlow.enqueue(log);
-    });
+    }, (this.logFlow as any).isConsoleEnabled && (this.logFlow as any).isConsoleEnabled());
 
     next();
   }

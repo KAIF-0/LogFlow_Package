@@ -15,6 +15,7 @@ type NormalizedConfig = {
   batchSize: number;
   retries: number;
   timeoutMs: number;
+  console: boolean;
 };
 
 export class LogFlow {
@@ -40,10 +41,11 @@ export class LogFlow {
     this.config = {
       apiKey: config.apiKey,
       baseUrl: this.normalizeBaseUrl(config.baseUrl),
-      flushIntervalMs: config.flushIntervalMs ?? 10000,
-      batchSize: config.batchSize ?? 50,
+      flushIntervalMs: this.clampNumber(config.flushIntervalMs ?? 10000, 5000, 60000),
+      batchSize: this.clampNumber(config.batchSize ?? 50, 10, 100),
       retries: config.retries ?? 3,
-      timeoutMs: 10000
+      timeoutMs: 10000,
+      console: config.console ?? true
     };
 
     this.validator = new StartupValidator(
@@ -69,6 +71,16 @@ export class LogFlow {
     this.initialized = false;
     this.timer = null;
     this.flushing = false;
+  }
+
+  public isConsoleEnabled(): boolean {
+    return this.config.console;
+  }
+
+  private clampNumber(value: number, min: number, max: number): number {
+    if (Number.isNaN(value) || value < min) return min;
+    if (value > max) return max;
+    return Math.floor(value);
   }
 
   public async initialize(): Promise<void> {

@@ -8,7 +8,8 @@ export class ResponseInterceptor {
     req: Request,
     res: Response,
     context: RequestContext,
-    onComplete: (log: LifecycleLog) => void
+    onComplete: (log: LifecycleLog) => void,
+    consoleEnabled = false
   ): void {
     let responseBody: string = '';
     let finished = false;
@@ -53,6 +54,10 @@ export class ResponseInterceptor {
         latencyMs,
         errorMessage: context.errorMessage
       };
+
+      if (consoleEnabled) {
+        console.log(`[LogFlow][Response] ${log.statusCode} ${log.path} ${latencyMs}ms`);
+      }
 
       onComplete(log);
     };

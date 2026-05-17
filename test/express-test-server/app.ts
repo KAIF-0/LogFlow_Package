@@ -23,5 +23,5 @@ app.get('/error', (req, res) => {
 });
 
 app.listen(3000, () => {
-  console.log('express-high-traffic listening on 3000');
+  void 0;
 });
