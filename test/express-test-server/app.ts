@@ -1,12 +1,15 @@
 import express from 'express';
 import { LogFlow } from 'logflow-sdk';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 app.use(express.json());
 
 const logger = new LogFlow({
-  apiKey: 'lf_7_T7BSN1gdHA_cPKmhL55m7Z2NGdcm3VbgQ_kry1SUemc',
-  baseUrl: 'https://symmetrical-happiness-4j7xw6v5pqg5cqvjq-8080.app.github.dev',
+  apiKey: process.env.LOGFLOW_API_KEY!,
+  baseUrl: process.env.LOGFLOW_BASE_URL!,
   flushIntervalMs: 5000,
   batchSize: 20
 });

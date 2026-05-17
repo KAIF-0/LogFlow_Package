@@ -6,6 +6,7 @@
     "dev": "tsx app.ts"
   },
   "dependencies": {
+    "dotenv": "^17.4.2",
     "express": "^4.19.2",
     "logflow-sdk": "^0.1.0"
   },
