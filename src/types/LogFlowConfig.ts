@@ -4,5 +4,6 @@ export interface LogFlowConfig {
   flushIntervalMs?: number;
   batchSize?: number;
   retries?: number;
+  timeoutMs?: number;
   console?: boolean;
 }

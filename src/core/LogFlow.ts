@@ -31,21 +31,18 @@ export class LogFlow {
   private flushing: boolean;
 
   public constructor(config: LogFlowConfig) {
-    if (!config.apiKey) {
-      throw new Error('apiKey is required');
-    }
-    if (!config.baseUrl) {
-      throw new Error('baseUrl is required');
-    }
+    const apiKey = this.requireString(config.apiKey, 'apiKey');
+    const baseUrl = this.requireString(config.baseUrl, 'baseUrl');
+    const consoleEnabled = this.requireBoolean(config.console ?? true, 'console');
 
     this.config = {
-      apiKey: config.apiKey,
-      baseUrl: this.normalizeBaseUrl(config.baseUrl),
-      flushIntervalMs: this.clampNumber(config.flushIntervalMs ?? 10000, 5000, 60000),
-      batchSize: this.clampNumber(config.batchSize ?? 50, 10, 100),
-      retries: config.retries ?? 3,
-      timeoutMs: 10000,
-      console: config.console ?? true
+      apiKey,
+      baseUrl: this.normalizeBaseUrl(baseUrl),
+      flushIntervalMs: this.requireIntegerInRange(config.flushIntervalMs ?? 10000, 5000, 60000, 'flushIntervalMs'),
+      batchSize: this.requireIntegerInRange(config.batchSize ?? 50, 10, 500, 'batchSize'),
+      retries: this.requireIntegerInRange(config.retries ?? 3, 1, 5, 'retries'),
+      timeoutMs: this.requireIntegerInRange(config.timeoutMs ?? 10000, 5000, 10000, 'timeoutMs'),
+      console: consoleEnabled
     };
 
     this.validator = new StartupValidator(
@@ -77,10 +74,32 @@ export class LogFlow {
     return this.config.console;
   }
 
-  private clampNumber(value: number, min: number, max: number): number {
-    if (Number.isNaN(value) || value < min) return min;
-    if (value > max) return max;
-    return Math.floor(value);
+  private requireIntegerInRange(value: number, min: number, max: number, fieldName: string): number {
+    if (typeof value !== 'number' || !Number.isFinite(value) || !Number.isInteger(value)) {
+      throw new Error(`${fieldName} must be an integer`);
+    }
+
+    if (value < min || value > max) {
+      throw new Error(`${fieldName} must be between ${min} and ${max}`);
+    }
+
+    return value;
+  }
+
+  private requireString(value: unknown, fieldName: string): string {
+    if (typeof value !== 'string' || value.trim().length === 0) {
+      throw new Error(`${fieldName} must be a non-empty string`);
+    }
+
+    return value.trim();
+  }
+
+  private requireBoolean(value: unknown, fieldName: string): boolean {
+    if (typeof value !== 'boolean') {
+      throw new Error(`${fieldName} must be a boolean`);
+    }
+
+    return value;
   }
 
   public async initialize(): Promise<void> {
